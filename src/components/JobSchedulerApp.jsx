@@ -166,25 +166,25 @@ const JobSchedulerApp = () => {
   const JobsTab = () => (
     <div className="jobs-tab">
       <div className="jobs-header">
-        <h3>Jobs ({jobs.length})</h3>
+        <h3>📋 Jobs ({jobs.length})</h3>
         <div className="header-actions">
-          <button 
-            className="create-job-btn"
-            onClick={() => setShowCreateForm(true)}
-          >
-            + Create Job
-          </button>
           <button 
             className="refresh-btn"
             onClick={fetchData}
             disabled={isLoading}
+            aria-label="Refresh jobs"
           >
-            Refresh
+            {isLoading ? <div className="loading-spinner"></div> : '🔄'} Refresh
+          </button>
+          <button 
+            className="create-job-btn"
+            onClick={() => setShowCreateForm(true)}
+            aria-label="Create new job"
+          >
+            ✨ Create Job
           </button>
         </div>
       </div>
-      
-      {showCreateForm && <CreateJobForm />}
       
       <div className="jobs-grid">
         {jobs.map(job => (
@@ -200,10 +200,22 @@ const JobSchedulerApp = () => {
             </div>
             
             <div className="job-details">
-              <p><strong>Schedule:</strong> {job.schedule}</p>
-              <p><strong>Command:</strong> {job.command}</p>
-              <p><strong>Dependencies:</strong> {job.dependencies.length > 0 ? job.dependencies.join(', ') : 'None'}</p>
-              <p><strong>Status:</strong> {job.enabled ? 'Enabled' : 'Disabled'}</p>
+              <div className="job-detail-item">
+                <span className="job-detail-label">📅 Schedule:</span>
+                <span className="job-detail-value">{job.schedule}</span>
+              </div>
+              <div className="job-detail-item">
+                <span className="job-detail-label">⚡ Command:</span>
+                <span className="job-detail-value">{job.command}</span>
+              </div>
+              <div className="job-detail-item">
+                <span className="job-detail-label">🔗 Dependencies:</span>
+                <span className="job-detail-value">{job.dependencies.length > 0 ? job.dependencies.join(', ') : 'None'}</span>
+              </div>
+              <div className="job-detail-item">
+                <span className="job-detail-label">📊 Status:</span>
+                <span className="job-detail-value">{job.enabled ? '🟢 Enabled' : '🔴 Disabled'}</span>
+              </div>
             </div>
             
             <div className="job-actions">
@@ -211,38 +223,56 @@ const JobSchedulerApp = () => {
                 className="execute-btn"
                 onClick={() => handleExecuteJob(job.id)}
                 disabled={isLoading || !job.enabled}
+                aria-label={`Execute job ${job.name}`}
               >
-                Execute Now
+                {isLoading ? <div className="loading-spinner"></div> : '▶️'} Execute
               </button>
               <button 
                 className={`toggle-btn ${job.enabled ? 'enabled' : 'disabled'}`}
                 onClick={() => handleToggleJob(job.id, !job.enabled)}
+                aria-label={job.enabled ? `Disable job ${job.name}` : `Enable job ${job.name}`}
               >
-                {job.enabled ? 'Disable' : 'Enable'}
+                {job.enabled ? '⏸️ Disable' : '▶️ Enable'}
               </button>
               <button 
                 className="details-btn"
                 onClick={() => setSelectedJob(job)}
+                aria-label={`View details for job ${job.name}`}
               >
-                Details
+                🔍 Details
               </button>
             </div>
           </div>
         ))}
       </div>
+      
+      {jobs.length === 0 && (
+        <div className="empty-state">
+          <div className="empty-icon">📋</div>
+          <h3>No jobs found</h3>
+          <p>Create your first job to get started with task scheduling</p>
+          <button 
+            className="create-job-btn"
+            onClick={() => setShowCreateForm(true)}
+          >
+            ✨ Create Your First Job
+          </button>
+        </div>
+      )}
     </div>
   );
 
   const ExecutionsTab = () => (
     <div className="executions-tab">
       <div className="executions-header">
-        <h3>Recent Executions ({executions.length})</h3>
+        <h3>🔄 Recent Executions ({executions.length})</h3>
         <button 
           className="refresh-btn"
           onClick={fetchData}
           disabled={isLoading}
+          aria-label="Refresh executions"
         >
-          Refresh
+          {isLoading ? <div className="loading-spinner"></div> : '🔄'} Refresh
         </button>
       </div>
       
@@ -250,13 +280,13 @@ const JobSchedulerApp = () => {
         <table>
           <thead>
             <tr>
-              <th>Job Name</th>
-              <th>Status</th>
-              <th>Scheduled</th>
-              <th>Started</th>
-              <th>Duration</th>
-              <th>Worker</th>
-              <th>Retries</th>
+              <th>📋 Job Name</th>
+              <th>📊 Status</th>
+              <th>📅 Scheduled</th>
+              <th>⏰ Started</th>
+              <th>⏱️ Duration</th>
+              <th>👷 Worker</th>
+              <th>🔁 Retries</th>
             </tr>
           </thead>
           <tbody>
@@ -281,58 +311,118 @@ const JobSchedulerApp = () => {
           </tbody>
         </table>
       </div>
+      
+      {executions.length === 0 && (
+        <div className="empty-state">
+          <div className="empty-icon">🔄</div>
+          <h3>No executions yet</h3>
+          <p>Job executions will appear here once jobs start running</p>
+        </div>
+      )}
     </div>
   );
 
   const SystemStatusTab = () => (
     <div className="system-status-tab">
-      <h3>System Status</h3>
+      <h3>📊 System Status Overview</h3>
       
       {systemStatus && (
         <div className="status-grid">
           <div className="status-card">
-            <h4>Scheduler</h4>
-            <p><strong>Status:</strong> {systemStatus.scheduler.isRunning ? 'Running' : 'Stopped'}</p>
+            <h4>⚙️ Scheduler</h4>
+            <p>
+              <strong>Status:</strong> 
+              <span className="status-value">{systemStatus.scheduler.isRunning ? '🟢 Running' : '🔴 Stopped'}</span>
+            </p>
+            <p>
+              <strong>Uptime:</strong> 
+              <span className="status-value">Active</span>
+            </p>
           </div>
           
           <div className="status-card">
-            <h4>Jobs</h4>
-            <p><strong>Total:</strong> {systemStatus.jobs.totalJobs}</p>
-            <p><strong>Enabled:</strong> {systemStatus.jobs.enabledJobs}</p>
-            <p><strong>High Priority:</strong> {systemStatus.jobs.jobsByPriority.HIGH}</p>
-            <p><strong>Medium Priority:</strong> {systemStatus.jobs.jobsByPriority.MEDIUM}</p>
-            <p><strong>Low Priority:</strong> {systemStatus.jobs.jobsByPriority.LOW}</p>
+            <h4>📋 Jobs</h4>
+            <p>
+              <strong>Total Jobs:</strong> 
+              <span className="status-value">{systemStatus.jobs.totalJobs}</span>
+            </p>
+            <p>
+              <strong>Enabled:</strong> 
+              <span className="status-value">{systemStatus.jobs.enabledJobs}</span>
+            </p>
+            <p>
+              <strong>🔴 High Priority:</strong> 
+              <span className="status-value">{systemStatus.jobs.jobsByPriority.HIGH}</span>
+            </p>
+            <p>
+              <strong>🟡 Medium Priority:</strong> 
+              <span className="status-value">{systemStatus.jobs.jobsByPriority.MEDIUM}</span>
+            </p>
+            <p>
+              <strong>🟢 Low Priority:</strong> 
+              <span className="status-value">{systemStatus.jobs.jobsByPriority.LOW}</span>
+            </p>
           </div>
           
           <div className="status-card">
-            <h4>Executions</h4>
-            <p><strong>Total:</strong> {systemStatus.jobs.totalExecutions}</p>
-            <p><strong>Completed:</strong> {systemStatus.jobs.executionsByStatus.COMPLETED}</p>
-            <p><strong>Failed:</strong> {systemStatus.jobs.executionsByStatus.FAILED}</p>
-            <p><strong>Running:</strong> {systemStatus.jobs.executionsByStatus.RUNNING}</p>
-            <p><strong>Pending:</strong> {systemStatus.jobs.executionsByStatus.PENDING}</p>
+            <h4>🔄 Executions</h4>
+            <p>
+              <strong>Total Executions:</strong> 
+              <span className="status-value">{systemStatus.jobs.totalExecutions}</span>
+            </p>
+            <p>
+              <strong>✅ Completed:</strong> 
+              <span className="status-value">{systemStatus.jobs.executionsByStatus.COMPLETED}</span>
+            </p>
+            <p>
+              <strong>❌ Failed:</strong> 
+              <span className="status-value">{systemStatus.jobs.executionsByStatus.FAILED}</span>
+            </p>
+            <p>
+              <strong>🔄 Running:</strong> 
+              <span className="status-value">{systemStatus.jobs.executionsByStatus.RUNNING}</span>
+            </p>
+            <p>
+              <strong>⏳ Pending:</strong> 
+              <span className="status-value">{systemStatus.jobs.executionsByStatus.PENDING}</span>
+            </p>
           </div>
           
           <div className="status-card">
-            <h4>Workers</h4>
-            <p><strong>Total:</strong> {systemStatus.workers.totalWorkers}</p>
-            <p><strong>Healthy:</strong> {systemStatus.workers.healthyWorkers}</p>
-            <p><strong>Capacity:</strong> {systemStatus.workers.totalCapacity}</p>
-            <p><strong>Load:</strong> {systemStatus.workers.totalLoad}</p>
-            <p><strong>Utilization:</strong> {systemStatus.workers.utilizationRate.toFixed(1)}%</p>
+            <h4>👷 Workers</h4>
+            <p>
+              <strong>Total Workers:</strong> 
+              <span className="status-value">{systemStatus.workers.totalWorkers}</span>
+            </p>
+            <p>
+              <strong>💚 Healthy:</strong> 
+              <span className="status-value">{systemStatus.workers.healthyWorkers}</span>
+            </p>
+            <p>
+              <strong>🏭 Capacity:</strong> 
+              <span className="status-value">{systemStatus.workers.totalCapacity}</span>
+            </p>
+            <p>
+              <strong>📈 Load:</strong> 
+              <span className="status-value">{systemStatus.workers.totalLoad}</span>
+            </p>
+            <p>
+              <strong>📊 Utilization:</strong> 
+              <span className="status-value">{systemStatus.workers.utilizationRate.toFixed(1)}%</span>
+            </p>
           </div>
         </div>
       )}
       
       {systemStatus && systemStatus.nextExecutions && (
         <div className="next-executions">
-          <h4>Next Executions</h4>
+          <h4>⏰ Next Scheduled Executions</h4>
           <table>
             <thead>
               <tr>
-                <th>Job ID</th>
-                <th>Next Execution</th>
-                <th>Schedule</th>
+                <th>📋 Job ID</th>
+                <th>⏰ Next Execution</th>
+                <th>📅 Schedule</th>
               </tr>
             </thead>
             <tbody>
@@ -345,6 +435,14 @@ const JobSchedulerApp = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+      
+      {!systemStatus && (
+        <div className="empty-state">
+          <div className="empty-icon">📊</div>
+          <h3>Loading system status...</h3>
+          <div className="loading-spinner"></div>
         </div>
       )}
     </div>
@@ -369,43 +467,43 @@ const JobSchedulerApp = () => {
       <div className="modal-overlay" onClick={onClose}>
         <div className="modal-content" onClick={e => e.stopPropagation()}>
           <div className="modal-header">
-            <h3>{job.name}</h3>
-            <button className="close-btn" onClick={onClose}>×</button>
+            <h3>🔍 {job.name}</h3>
+            <button className="close-btn" onClick={onClose} aria-label="Close modal">×</button>
           </div>
           
           <div className="modal-body">
             <div className="job-info">
-              <h4>Job Information</h4>
-              <p><strong>ID:</strong> {job.id}</p>
-              <p><strong>Description:</strong> {job.description || 'No description'}</p>
-              <p><strong>Schedule:</strong> {job.schedule}</p>
-              <p><strong>Command:</strong> {job.command}</p>
-              <p><strong>Priority:</strong> {job.priority}</p>
-              <p><strong>Dependencies:</strong> {job.dependencies.length > 0 ? job.dependencies.join(', ') : 'None'}</p>
-              <p><strong>Enabled:</strong> {job.enabled ? 'Yes' : 'No'}</p>
-              <p><strong>Max Retries:</strong> {job.retryPolicy.maxRetries}</p>
-              <p><strong>Retry Delay:</strong> {job.retryPolicy.delayMs}ms</p>
+              <h4>📋 Job Information</h4>
+              <p><strong>ID:</strong> <span>{job.id}</span></p>
+              <p><strong>Description:</strong> <span>{job.description || 'No description'}</span></p>
+              <p><strong>Schedule:</strong> <span>{job.schedule}</span></p>
+              <p><strong>Command:</strong> <span>{job.command}</span></p>
+              <p><strong>Priority:</strong> <span>{job.priority}</span></p>
+              <p><strong>Dependencies:</strong> <span>{job.dependencies.length > 0 ? job.dependencies.join(', ') : 'None'}</span></p>
+              <p><strong>Enabled:</strong> <span>{job.enabled ? '✅ Yes' : '❌ No'}</span></p>
+              <p><strong>Max Retries:</strong> <span>{job.retryPolicy.maxRetries}</span></p>
+              <p><strong>Retry Delay:</strong> <span>{job.retryPolicy.delayMs}ms</span></p>
             </div>
             
             {jobStatus && (
               <div className="job-status">
-                <h4>Status</h4>
-                <p><strong>Next Execution:</strong> {jobStatus.nextExecution ? formatDate(jobStatus.nextExecution) : 'Not scheduled'}</p>
-                <p><strong>Can Execute:</strong> {jobStatus.canExecute ? 'Yes' : 'No'}</p>
-                <p><strong>Dependencies Satisfied:</strong> {jobStatus.dependencies.satisfied ? 'Yes' : 'No'}</p>
+                <h4>📊 Current Status</h4>
+                <p><strong>Next Execution:</strong> <span>{jobStatus.nextExecution ? formatDate(jobStatus.nextExecution) : 'Not scheduled'}</span></p>
+                <p><strong>Can Execute:</strong> <span>{jobStatus.canExecute ? '✅ Yes' : '❌ No'}</span></p>
+                <p><strong>Dependencies Satisfied:</strong> <span>{jobStatus.dependencies.satisfied ? '✅ Yes' : '❌ No'}</span></p>
               </div>
             )}
             
             {jobStatus && jobStatus.recentExecutions && (
               <div className="recent-executions">
-                <h4>Recent Executions</h4>
+                <h4>🔄 Recent Executions</h4>
                 <table>
                   <thead>
                     <tr>
-                      <th>Status</th>
-                      <th>Scheduled</th>
-                      <th>Duration</th>
-                      <th>Worker</th>
+                      <th>📊 Status</th>
+                      <th>📅 Scheduled</th>
+                      <th>⏱️ Duration</th>
+                      <th>👷 Worker</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -436,75 +534,79 @@ const JobSchedulerApp = () => {
 
   const CreateJobForm = () => (
     <div className="create-job-form">
-      <h4>Create New Job</h4>
       <div className="form-grid">
         <div className="form-group">
-          <label>Job ID *</label>
+          <label>🆔 Job ID *</label>
           <input
             type="text"
             value={newJob.id}
             onChange={(e) => setNewJob({...newJob, id: e.target.value})}
             placeholder="unique-job-id"
+            required
           />
         </div>
         <div className="form-group">
-          <label>Job Name *</label>
+          <label>📝 Job Name *</label>
           <input
             type="text"
             value={newJob.name}
             onChange={(e) => setNewJob({...newJob, name: e.target.value})}
-            placeholder="My Job"
+            placeholder="My Awesome Job"
+            required
           />
         </div>
         <div className="form-group">
-          <label>Description</label>
+          <label>📄 Description</label>
           <textarea
             value={newJob.description}
             onChange={(e) => setNewJob({...newJob, description: e.target.value})}
-            placeholder="Job description"
+            placeholder="Describe what this job does..."
+            rows="3"
           />
         </div>
         <div className="form-group">
-          <label>Schedule *</label>
+          <label>📅 Schedule *</label>
           <input
             type="text"
             value={newJob.schedule}
             onChange={(e) => setNewJob({...newJob, schedule: e.target.value})}
             placeholder="every 5 minutes, daily at 3 AM, etc."
+            required
           />
         </div>
         <div className="form-group">
-          <label>Command *</label>
+          <label>⚡ Command *</label>
           <select
             value={newJob.command}
             onChange={(e) => setNewJob({...newJob, command: e.target.value})}
+            required
           >
-            <option value="">Select command</option>
-            <option value="echo">Echo</option>
-            <option value="sleep">Sleep</option>
-            <option value="calculate">Calculate</option>
-            <option value="api_call">API Call</option>
-            <option value="data_processing">Data Processing</option>
-            <option value="backup">Backup</option>
-            <option value="cleanup">Cleanup</option>
-            <option value="health_check">Health Check</option>
-            <option value="database_maintenance">Database Maintenance</option>
-            <option value="report_generation">Report Generation</option>
+            <option value="">Select command type</option>
+            <option value="echo">🔊 Echo</option>
+            <option value="sleep">😴 Sleep</option>
+            <option value="calculate">🧮 Calculate</option>
+            <option value="api_call">🌐 API Call</option>
+            <option value="data_processing">📊 Data Processing</option>
+            <option value="backup">💾 Backup</option>
+            <option value="cleanup">🧹 Cleanup</option>
+            <option value="health_check">🏥 Health Check</option>
+            <option value="database_maintenance">🗄️ Database Maintenance</option>
+            <option value="report_generation">📈 Report Generation</option>
           </select>
         </div>
         <div className="form-group">
-          <label>Priority</label>
+          <label>🎯 Priority</label>
           <select
             value={newJob.priority}
             onChange={(e) => setNewJob({...newJob, priority: e.target.value})}
           >
-            <option value={JobPriority.HIGH}>High</option>
-            <option value={JobPriority.MEDIUM}>Medium</option>
-            <option value={JobPriority.LOW}>Low</option>
+            <option value={JobPriority.HIGH}>🔴 High</option>
+            <option value={JobPriority.MEDIUM}>🟡 Medium</option>
+            <option value={JobPriority.LOW}>🟢 Low</option>
           </select>
         </div>
         <div className="form-group">
-          <label>Max Retries</label>
+          <label>🔁 Max Retries</label>
           <input
             type="number"
             value={newJob.retryPolicy.maxRetries}
@@ -520,7 +622,7 @@ const JobSchedulerApp = () => {
           />
         </div>
         <div className="form-group">
-          <label>Retry Delay (ms)</label>
+          <label>⏱️ Retry Delay (ms)</label>
           <input
             type="number"
             value={newJob.retryPolicy.delayMs}
@@ -538,17 +640,24 @@ const JobSchedulerApp = () => {
       </div>
       <div className="form-actions">
         <button 
+          className="cancel-btn" 
+          onClick={() => setShowCreateForm(false)}
+        >
+          ❌ Cancel
+        </button>
+        <button 
           className="create-btn" 
           onClick={handleCreateJob}
           disabled={isLoading || !newJob.id || !newJob.name || !newJob.schedule || !newJob.command}
         >
-          {isLoading ? 'Creating...' : 'Create Job'}
-        </button>
-        <button 
-          className="cancel-btn" 
-          onClick={() => setShowCreateForm(false)}
-        >
-          Cancel
+          {isLoading ? (
+            <>
+              <div className="loading-spinner"></div>
+              <span className="loading-text">Creating...</span>
+            </>
+          ) : (
+            '✨ Create Job'
+          )}
         </button>
       </div>
     </div>
@@ -557,47 +666,70 @@ const JobSchedulerApp = () => {
   return (
     <div className="job-scheduler-app">
       <header className="app-header">
-        <h1>Distributed Job Scheduler</h1>
-        <div className="header-status">
-          <span className={`status-indicator ${systemStatus?.scheduler?.isRunning ? 'running' : 'stopped'}`}>
-            {systemStatus?.scheduler?.isRunning ? 'Running' : 'Stopped'}
-          </span>
+        <div className="app-header-content">
+          <div>
+            <h1>🚀 Distributed Job Scheduler</h1>
+            <div className="subtitle">Modern, scalable job management system</div>
+          </div>
+          <div className="header-status">
+            <span className={`status-indicator ${systemStatus?.scheduler?.isRunning ? 'running' : 'stopped'}`}>
+              {systemStatus?.scheduler?.isRunning ? '🟢 Running' : '🔴 Stopped'}
+            </span>
+            {systemStatus && (
+              <div className="system-stats">
+                <div className="stat-item">
+                  <div className="stat-value">{systemStatus.jobs.totalJobs}</div>
+                  <div className="stat-label">Jobs</div>
+                </div>
+                <div className="stat-item">
+                  <div className="stat-value">{systemStatus.workers.totalWorkers}</div>
+                  <div className="stat-label">Workers</div>
+                </div>
+                <div className="stat-item">
+                  <div className="stat-value">{systemStatus.workers.utilizationRate.toFixed(1)}%</div>
+                  <div className="stat-label">Utilization</div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
-      {error && (
-        <div className="error-banner">
-          <span>{error}</span>
-          <button onClick={() => setError(null)}>×</button>
-        </div>
-      )}
+      <div className="container">
+        {error && (
+          <div className="error-banner">
+            <span>⚠️ {error}</span>
+            <button onClick={() => setError(null)} aria-label="Close error">×</button>
+          </div>
+        )}
 
-      <nav className="tab-nav">
-        <button 
-          className={activeTab === 'jobs' ? 'active' : ''}
-          onClick={() => setActiveTab('jobs')}
-        >
-          Jobs
-        </button>
-        <button 
-          className={activeTab === 'executions' ? 'active' : ''}
-          onClick={() => setActiveTab('executions')}
-        >
-          Executions
-        </button>
-        <button 
-          className={activeTab === 'status' ? 'active' : ''}
-          onClick={() => setActiveTab('status')}
-        >
-          System Status
-        </button>
-      </nav>
+        <nav className="tab-nav">
+          <button 
+            className={activeTab === 'jobs' ? 'active' : ''}
+            onClick={() => setActiveTab('jobs')}
+          >
+            📋 Jobs
+          </button>
+          <button 
+            className={activeTab === 'executions' ? 'active' : ''}
+            onClick={() => setActiveTab('executions')}
+          >
+            🔄 Executions
+          </button>
+          <button 
+            className={activeTab === 'status' ? 'active' : ''}
+            onClick={() => setActiveTab('status')}
+          >
+            📊 System Status
+          </button>
+        </nav>
 
-      <main className="app-main">
-        {activeTab === 'jobs' && <JobsTab />}
-        {activeTab === 'executions' && <ExecutionsTab />}
-        {activeTab === 'status' && <SystemStatusTab />}
-      </main>
+        <main className="app-main">
+          {activeTab === 'jobs' && <JobsTab />}
+          {activeTab === 'executions' && <ExecutionsTab />}
+          {activeTab === 'status' && <SystemStatusTab />}
+        </main>
+      </div>
 
       <JobDetailsModal 
         job={selectedJob} 
@@ -608,8 +740,8 @@ const JobSchedulerApp = () => {
         <div className="modal-overlay" onClick={() => setShowCreateForm(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Create New Job</h3>
-              <button className="close-btn" onClick={() => setShowCreateForm(false)}>×</button>
+              <h3>✨ Create New Job</h3>
+              <button className="close-btn" onClick={() => setShowCreateForm(false)} aria-label="Close modal">×</button>
             </div>
             
             <div className="modal-body">
