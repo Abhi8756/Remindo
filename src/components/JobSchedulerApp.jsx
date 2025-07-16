@@ -163,6 +163,21 @@ const JobSchedulerApp = () => {
     return `${Math.round(duration / 1000)}s`;
   };
 
+  const formatUptime = (uptime) => {
+    if (!uptime) return 'N/A';
+    const seconds = Math.floor(uptime / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes % 60}m`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${seconds % 60}s`;
+    } else {
+      return `${seconds}s`;
+    }
+  };
+
   const JobsTab = () => (
     <div className="jobs-tab">
       <div className="jobs-header">
@@ -183,6 +198,39 @@ const JobSchedulerApp = () => {
           >
             ✨ Create Job
           </button>
+        </div>
+      </div>
+      
+      {/* Demo Instructions */}
+      <div className="demo-instructions">
+        <div className="demo-card">
+          <h4>🚀 How to Use the Job Scheduler</h4>
+          <div className="demo-steps">
+            <div className="step">
+              <span className="step-number">1</span>
+              <div className="step-content">
+                <strong>Sample Jobs Created:</strong> The system has pre-loaded sample jobs including database backups, log processing, and health checks.
+              </div>
+            </div>
+            <div className="step">
+              <span className="step-number">2</span>
+              <div className="step-content">
+                <strong>Execute Jobs:</strong> Click the "▶️ Execute" button on any job card to run it immediately and see it in action.
+              </div>
+            </div>
+            <div className="step">
+              <span className="step-number">3</span>
+              <div className="step-content">
+                <strong>Monitor Progress:</strong> Check the "🔄 Executions" tab to see job execution history and status.
+              </div>
+            </div>
+            <div className="step">
+              <span className="step-number">4</span>
+              <div className="step-content">
+                <strong>View System Status:</strong> The "📊 System Status" tab shows worker health and system performance.
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -326,6 +374,34 @@ const JobSchedulerApp = () => {
     <div className="system-status-tab">
       <h3>📊 System Status Overview</h3>
       
+      {/* System Architecture Info */}
+      <div className="system-info">
+        <div className="info-card">
+          <h4>🏗️ System Architecture</h4>
+          <p>This is a <strong>distributed job scheduler</strong> that simulates a real-world system with:</p>
+          <ul>
+            <li>🔄 <strong>Job Scheduler:</strong> Central coordinator that manages job execution</li>
+            <li>👷 <strong>Worker Nodes:</strong> Distributed workers that execute jobs</li>
+            <li>📦 <strong>Job Storage:</strong> In-memory storage for jobs and execution history</li>
+            <li>🔗 <strong>Dependency Manager:</strong> Handles job dependencies and execution order</li>
+            <li>⏰ <strong>Schedule Manager:</strong> Manages cron-like scheduling</li>
+          </ul>
+        </div>
+        
+        <div className="info-card">
+          <h4>🚀 How It Works</h4>
+          <p>The scheduler continuously:</p>
+          <ul>
+            <li>📅 Checks for jobs that need to be executed based on their schedule</li>
+            <li>🔍 Validates job dependencies before execution</li>
+            <li>🎯 Selects the best available worker for each job</li>
+            <li>▶️ Executes jobs and tracks their progress</li>
+            <li>🔄 Handles retries for failed jobs</li>
+            <li>💚 Monitors worker health and availability</li>
+          </ul>
+        </div>
+      </div>
+      
       {systemStatus && (
         <div className="status-grid">
           <div className="status-card">
@@ -336,7 +412,7 @@ const JobSchedulerApp = () => {
             </p>
             <p>
               <strong>Uptime:</strong> 
-              <span className="status-value">Active</span>
+              <span className="status-value">{systemStatus.scheduler.isRunning ? formatUptime(systemStatus.scheduler.uptime) : 'N/A'}</span>
             </p>
           </div>
           
@@ -411,6 +487,27 @@ const JobSchedulerApp = () => {
               <span className="status-value">{systemStatus.workers.utilizationRate.toFixed(1)}%</span>
             </p>
           </div>
+          
+          {systemStatus.workers.workerDetails && (
+            <div className="status-card worker-details">
+              <h4>🖥️ Worker Details</h4>
+              <div className="worker-list">
+                {systemStatus.workers.workerDetails.map(worker => (
+                  <div key={worker.id} className="worker-item">
+                    <div className="worker-info">
+                      <strong>{worker.id}</strong>
+                      <span className={`worker-status ${worker.status.toLowerCase()}`}>
+                        {worker.status === 'HEALTHY' ? '💚' : '❌'} {worker.status}
+                      </span>
+                    </div>
+                    <div className="worker-stats">
+                      <small>Load: {worker.currentLoad}/{worker.capacity} ({worker.utilizationRate.toFixed(1)}%)</small>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
       

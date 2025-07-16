@@ -14,7 +14,7 @@ export class WorkerPool {
    * Initialize placeholder worker machines
    */
   initializeWorkers() {
-    // Placeholder worker machines
+    // Placeholder worker machines (simulating distributed workers)
     const workerConfigs = [
       { id: 'worker-1', host: 'worker-node-1.local', port: 8080, capacity: 5 },
       { id: 'worker-2', host: 'worker-node-2.local', port: 8080, capacity: 8 },
@@ -24,8 +24,13 @@ export class WorkerPool {
 
     for (const config of workerConfigs) {
       const worker = new WorkerNode(config.id, config.host, config.port, config.capacity);
+      // Initialize worker as healthy and available
+      worker.status = 'HEALTHY';
+      worker.lastHeartbeat = new Date();
       this.workers.set(worker.id, worker);
     }
+
+    console.log(`Initialized ${this.workers.size} workers:`, Array.from(this.workers.keys()));
   }
 
   /**
@@ -56,18 +61,27 @@ export class WorkerPool {
     const availableWorkers = this.getAvailableWorkers();
     
     if (availableWorkers.length === 0) {
+      console.warn('No available workers found');
       return null;
     }
 
     // Sort by current load (ascending) and capacity (descending)
-    // TODO: Implement priority-based selection
+    // Higher priority jobs get preference to workers with more capacity
     availableWorkers.sort((a, b) => {
       const loadDiff = a.currentLoad - b.currentLoad;
       if (loadDiff !== 0) return loadDiff;
-      return b.capacity - a.capacity;
+      
+      // For high priority jobs, prefer workers with more capacity
+      if (jobPriority === 'HIGH') {
+        return b.capacity - a.capacity;
+      }
+      
+      return a.capacity - b.capacity; // For normal jobs, prefer less loaded workers
     });
 
-    return availableWorkers[0];
+    const selectedWorker = availableWorkers[0];
+    console.log(`Selected worker ${selectedWorker.id} for job with priority ${jobPriority}`);
+    return selectedWorker;
   }
 
   /**

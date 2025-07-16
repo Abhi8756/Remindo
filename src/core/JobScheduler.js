@@ -30,7 +30,11 @@ export class JobScheduler {
     }
 
     this.isRunning = true;
+    this.startTime = Date.now();
     console.log('Starting job scheduler...');
+
+    // Initialize worker heartbeats
+    this.initializeWorkerHeartbeats();
 
     // Schedule jobs every 10 seconds
     this.schedulerInterval = setInterval(() => {
@@ -47,7 +51,37 @@ export class JobScheduler {
       this.processRetries();
     }, 5000);
 
+    // Update worker heartbeats every 15 seconds (simulate)
+    this.workerHeartbeatInterval = setInterval(() => {
+      this.updateWorkerHeartbeats();
+    }, 15000);
+
     console.log('Job scheduler started successfully');
+  }
+
+  /**
+   * Initialize worker heartbeats on startup
+   */
+  initializeWorkerHeartbeats() {
+    const workers = this.workerPool.getAllWorkers();
+    workers.forEach(worker => {
+      worker.status = 'HEALTHY';
+      worker.lastHeartbeat = new Date();
+      this.workerPool.updateHeartbeat(worker.id);
+    });
+    console.log(`Initialized ${workers.length} workers with healthy status`);
+  }
+
+  /**
+   * Update worker heartbeats (simulate in demo)
+   */
+  updateWorkerHeartbeats() {
+    const workers = this.workerPool.getAllWorkers();
+    workers.forEach(worker => {
+      if (worker.status === 'HEALTHY') {
+        this.workerPool.updateHeartbeat(worker.id);
+      }
+    });
   }
 
   /**
@@ -74,6 +108,11 @@ export class JobScheduler {
     if (this.retryInterval) {
       clearInterval(this.retryInterval);
       this.retryInterval = null;
+    }
+
+    if (this.workerHeartbeatInterval) {
+      clearInterval(this.workerHeartbeatInterval);
+      this.workerHeartbeatInterval = null;
     }
 
     console.log('Job scheduler stopped');
@@ -222,17 +261,21 @@ export class JobScheduler {
 
   // Status and Monitoring
   getSystemStatus() {
+    const workerStats = this.workerPool.getWorkerStats();
+    const jobStats = this.storage.getJobStats();
+    
     return {
       scheduler: {
         isRunning: this.isRunning,
         uptime: this.isRunning ? Date.now() - this.startTime : 0
       },
-      jobs: this.storage.getJobStats(),
-      workers: this.workerPool.getWorkerStats(),
+      jobs: jobStats,
+      workers: workerStats,
       dependencies: {
         errors: this.dependencyManager.validateDependencies()
       },
-      nextExecutions: this.scheduleManager.getAllNextExecutions().slice(0, 10)
+      nextExecutions: this.scheduleManager.getAllNextExecutions().slice(0, 10),
+      timestamp: new Date().toISOString()
     };
   }
 

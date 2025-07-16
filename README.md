@@ -1,163 +1,143 @@
-# Distributed Job Scheduler
+# Remindo - Job Scheduler
 
-A comprehensive distributed job scheduling system built with React and JavaScript that can schedule, execute, and monitor jobs across multiple worker nodes.
+A simple tool to schedule and run tasks automatically. Think of it like setting reminders for your computer to do things at specific times.
 
-## Features
+## What Does This Do?
 
-### Core Features
-- **Job Scheduling**: Cron-like scheduling with natural language support
-- **Job Dependencies**: Support for job dependency chains
-- **Priority Management**: High, Medium, Low priority job execution
-- **Retry Logic**: Configurable retry policies (Fixed, Exponential backoff)
-- **Worker Pool**: Distributed execution across multiple worker nodes
-- **Real-time Monitoring**: Live job status and execution tracking
-- **Persistent Storage**: In-memory job and execution history storage
-- **RESTful API**: Complete API for job management
-
-### Scheduling Features
-- **Natural Language Scheduling**:
-  - "every 5 minutes"
-  - "daily at 3 AM"
-  - "weekly on monday"
-- **Standard Cron Format**: Traditional cron expression support
-- **Dependency-based Execution**: Jobs wait for dependencies to complete
-- **Automatic Retry**: Failed jobs retry based on configured policy
-
-### Worker Management
-- **Load Balancing**: Automatic worker selection based on capacity
-- **Health Monitoring**: Worker health checks with heartbeat mechanism
-- **Fault Tolerance**: Graceful handling of worker failures
-- **Scalable Architecture**: Easy to add/remove worker nodes
-
-## System Architecture
-
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   React UI      │    │  Job Scheduler  │    │  Worker Pool    │
-│                 │    │                 │    │                 │
-│ - Job Management│◄──►│ - Core Engine   │◄──►│ - Worker Nodes  │
-│ - Status Monitor│    │ - API Layer     │    │ - Load Balancer │
-│ - Execution View│    │ - Storage       │    │ - Health Check  │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                │
-                                ▼
-                       ┌─────────────────┐
-                       │ Command Registry│
-                       │                 │
-                       │ - Built-in Cmds │
-                       │ - Custom Cmds   │
-                       │ - Executors     │
-                       └─────────────────┘
-```
-
-## Project Structure
-
-```
-src/
-├── api/
-│   └── JobSchedulerAPI.js          # RESTful API interface
-├── components/
-│   ├── JobSchedulerApp.jsx         # Main React component
-│   └── JobSchedulerApp.css         # Styling
-├── core/
-│   └── JobScheduler.js             # Core scheduling engine
-├── execution/
-│   └── JobExecutor.js              # Job execution and worker management
-├── storage/
-│   └── JobStorage.js               # In-memory storage and dependencies
-├── types/
-│   └── JobTypes.js                 # Type definitions and constants
-└── utils/
-    └── ScheduleUtils.js            # Cron scheduling utilities
-```
+This app helps you:
+- Schedule tasks to run automatically (like backups, reports, etc.)
+- Set up tasks that depend on other tasks finishing first
+- Monitor what's happening with your scheduled tasks
+- See which tasks succeeded or failed
 
 ## Getting Started
 
-### Prerequisites
-- Node.js (v14 or higher)
-- npm or yarn
+### Step 1: Install and Run
+1. Make sure you have Node.js installed on your computer
+2. Download this project
+3. Open a terminal/command prompt in the project folder
+4. Type: `npm install` (this downloads what the app needs)
+5. Type: `npm run dev` (this starts the app)
+6. Open your web browser and go to: `http://localhost:5173`
 
-### Installation
+### Step 2: Start the System
+When you first open the app, you'll see a "Start Scheduler" button. Click it to begin.
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+## How to Use
 
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
+### Main Screen
+The app has three main sections:
 
-4. Open your browser and navigate to `http://localhost:5173`
+**📋 Jobs Tab**
+- Shows all your scheduled tasks
+- Click "Execute" to run a task right now
+- Use the toggle switch to turn tasks on/off
 
-### Initial Setup
-The system automatically initializes with sample jobs when started. These include:
-- Database backup (daily at 2 AM)
-- Log processing (every 15 minutes)
-- Data synchronization (every 30 minutes)
-- Cleanup tasks (daily at 1 AM)
-- Report generation (daily at 6 AM with dependencies)
+**🔄 Executions Tab**
+- Shows what happened when tasks ran
+- See if they succeeded or failed
+- Check how long they took
 
-## Usage
+**📊 System Status Tab**
+- Shows if the system is running properly
+- Displays worker information (the "computers" that run your tasks)
 
-### Creating Jobs
+### Creating a New Task
+The app comes with sample tasks already set up, like:
+- Database backup (runs daily at 2 AM)
+- Log processing (runs every 15 minutes)
+- Data sync (runs every 30 minutes)
+- Cleanup tasks (runs daily at 1 AM)
+- Report generation (runs daily at 6 AM)
 
-Jobs can be created through the API or UI with the following properties:
+### Understanding Task Scheduling
+You can schedule tasks using simple phrases:
+- "every 5 minutes" - runs every 5 minutes
+- "daily at 3 AM" - runs once per day at 3:00 AM
+- "weekly on monday" - runs every Monday
 
-```javascript
-{
-  id: 'unique-job-id',
-  name: 'Job Name',
-  description: 'Job description',
-  schedule: 'every 5 minutes',  // or cron expression
-  command: 'command_name',
-  priority: 'HIGH',             // HIGH, MEDIUM, LOW
-  dependencies: ['job-id-1'],   // Array of job IDs
-  retryPolicy: {
-    type: 'FIXED',              // FIXED, EXPONENTIAL, NONE
-    maxRetries: 3,
-    delayMs: 1000
-  },
-  enabled: true,
-  metadata: {
-    commandArgs: {
-      // Command-specific arguments
-    }
-  }
-}
-```
+### Task Dependencies
+Some tasks need other tasks to finish first. For example:
+- A report task might wait for data processing to complete
+- A cleanup task might wait for backups to finish
 
-### Built-in Commands
+### Priority Levels
+Tasks have three priority levels:
+- **High**: Runs first when system is busy
+- **Medium**: Normal priority
+- **Low**: Runs when system has free time
 
-The system includes several built-in commands:
+## What You'll See
 
-- **echo**: Simple echo command
-- **sleep**: Sleep for specified duration
-- **calculate**: Basic arithmetic operations
-- **api_call**: Simulate API calls
-- **data_processing**: Simulate data processing
-- **backup**: Simulate backup operations
+### When Things Are Working
+- Green indicators show healthy workers
+- Tasks show "COMPLETED" status
+- Execution times are displayed
+- System status shows "Running"
 
-### Custom Commands
+### When Things Go Wrong
+- Red indicators show problems
+- Tasks show "FAILED" status
+- The system will automatically retry failed tasks
+- You can check the executions tab to see what went wrong
 
-Add custom commands to the executor:
+## Common Tasks
 
-```javascript
-scheduler.registerCommand('custom_command', async (args) => {
-  // Your custom logic here
-  return 'Command result';
-});
-```
+### Run a Task Immediately
+1. Go to the Jobs tab
+2. Find the task you want to run
+3. Click the "Execute" button
+4. Check the Executions tab to see the result
 
-### API Usage
+### Turn a Task On/Off
+1. Go to the Jobs tab
+2. Find the task you want to control
+3. Click the toggle switch next to it
 
-The system provides a comprehensive API:
+### Check System Health
+1. Go to the System Status tab
+2. Look for green indicators (good) or red indicators (problems)
+3. Check that workers are "Healthy"
 
-```javascript
-// Create job
-const result = await api.createJob(jobData);
+### View Task History
+1. Go to the Executions tab
+2. See all recent task runs
+3. Check status, duration, and which worker ran it
+
+## Troubleshooting
+
+### If Tasks Aren't Running
+- Make sure you clicked "Start Scheduler"
+- Check that the task is enabled (toggle switch is on)
+- Look for any error messages in the Executions tab
+
+### If the System Seems Slow
+- Check the System Status tab
+- Look for unhealthy workers
+- Try refreshing your browser
+
+### If Something Isn't Working
+- Refresh your browser page
+- Check the System Status tab for problems
+- Make sure the development server is still running
+
+## Tips
+
+- The system updates automatically every 5 seconds
+- You can have multiple tasks running at the same time
+- Tasks with dependencies will wait for their requirements to complete
+- Failed tasks will automatically retry a few times before giving up
+- The system can handle about 100 tasks per minute
+
+## Need Help?
+
+If you run into problems:
+1. Check the System Status tab first
+2. Look at the Executions tab for error messages
+3. Try restarting the development server (`npm run dev`)
+4. Refresh your browser
+
+That's it! The system is designed to be simple and automatic once you set it up.
 
 // Execute job immediately
 const execution = await api.executeJobNow(jobId);
@@ -299,59 +279,4 @@ npm run build
 npm run lint
 ```
 
-## Future Enhancements
 
-### Planned Features
-- [ ] Persistent database storage (PostgreSQL, MongoDB)
-- [ ] Real distributed worker communication
-- [ ] Job result persistence and history
-- [ ] Advanced scheduling (timezone support, holidays)
-- [ ] Job templates and workflows
-- [ ] Email/Slack notifications
-- [ ] Job performance analytics
-- [ ] REST API documentation (OpenAPI)
-- [ ] Authentication and authorization
-- [ ] Job versioning and rollback
-- [ ] Dynamic worker scaling
-- [ ] Job queue prioritization
-- [ ] Workflow orchestration
-- [ ] Integration with external systems
-
-### Technical Improvements
-- [ ] TypeScript migration
-- [ ] Unit and integration tests
-- [ ] Performance benchmarking
-- [ ] Load testing
-- [ ] Security hardening
-- [ ] Docker containerization
-- [ ] Kubernetes deployment
-- [ ] CI/CD pipeline
-- [ ] Monitoring and alerting
-- [ ] Documentation site
-
-## License
-
-This project is licensed under the MIT License.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## Support
-
-For questions or issues, please create an issue in the repository.+ Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
